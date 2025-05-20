@@ -1,0 +1,37 @@
+<div class="modal-header bg-primary text-white">
+  <h4 class="modal-title">Sélectionner un produit</h4>
+  <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <input type="text" class="form-control" placeholder="Rechercher un produit..." 
+           [(ngModel)]="searchTerm">
+  </div>
+
+  <div class="list-group">
+    <button type="button" class="list-group-item list-group-item-action" 
+            *ngFor="let product of filteredProducts"
+            (click)="selectProduct(product)">
+      <div class="d-flex justify-content-between">
+        <div>
+          <strong>{{ product.libelle }}</strong>
+          <div class="text-muted small">{{ product.description }}</div>
+        </div>
+        <div>
+          <span class="badge" 
+                [ngClass]="{'bg-success': (product.quantite || 0) > 0, 'bg-danger': (product.quantite || 0) <= 0}">
+            {{ getStockStatus(product) }}
+          </span>
+          <div class="text-end">{{ product.prix | number:'1.2-2' }} TND</div>
+        </div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="activeModal.dismiss()">
+    Annuler
+  </button>
+</div>

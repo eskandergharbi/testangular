@@ -1,0 +1,45 @@
+<div class="modal-header">
+  <h4 class="modal-title">Nettadvisor - Devis</h4>
+  <button type="button" class="btn p-1" aria-label="Close" (click)="activeModal.dismiss()">
+    <i class="bi bi-x-lg fs-5"></i>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Nom*</label>
+    <input type="text" class="form-control" [(ngModel)]="client.nom" placeholder="Entrez le nom de votre client">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Prénom*</label>
+    <input type="text" class="form-control" [(ngModel)]="client.prenom" placeholder="Entrez le prénom de votre client">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email*</label>
+    <input type="email" class="form-control" [(ngModel)]="client.email" placeholder="Entrez l'email de votre client">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Numéro de téléphone*</label>
+    <input type="tel" class="form-control" [(ngModel)]="client.telephone" placeholder="Entrez le numéro de votre client">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Adresse*</label>
+    <textarea class="form-control" [(ngModel)]="client.adresse" placeholder="Entrez l'adresse de votre client"></textarea>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Annuler</button>
+  <button type="button" class="btn btn-primary" (click)="saveClient()" [disabled]="isLoading">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Enregistrer
+  </button>
+</div>

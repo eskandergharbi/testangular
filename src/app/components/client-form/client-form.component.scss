@@ -1,0 +1,27 @@
+.modal-body {
+  .form-label {
+    font-weight: 600;
+  }
+}
+.modal-header {
+  background-color: #f8f9fa;  /* Fond légèrement grisé */
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+  position: relative;
+
+  .btn-close {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.25rem;
+    background-size: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    opacity: 0.8;
+    filter: none; /* Retirez le filtre invert si nécessaire */
+    
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}

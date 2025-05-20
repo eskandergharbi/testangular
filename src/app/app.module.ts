@@ -17,6 +17,14 @@ import { coreConfig } from 'app/app-config';
 import { AppComponent } from 'app/app.component';
 import { LayoutModule } from 'app/layout/layout.module';
 import { SampleModule } from 'app/main/sample/sample.module';
+import { ClientFormComponent } from './components/client-form/client-form.component';
+import { ProductFormComponent } from './components/product-form/product-form.component';
+import { QuoteDetailsComponent } from './components/quote-details/quote-details.component';
+import { QuoteListComponent } from './components/quote-list/quote-list.component';
+import { ProductSelectionModalComponent } from './product-selection-modal/product-selection-modal.component';
+import { AlertPopupComponent } from './components/alert-popup/alert-popup.component';
+import { DropdownModule } from 'primeng/dropdown';
+import { FormsModule } from '@angular/forms';
 
 const appRoutes: Routes = [
   {
@@ -35,8 +43,10 @@ const appRoutes: Routes = [
 ];
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent,  ClientFormComponent, ProductFormComponent, QuoteDetailsComponent,QuoteListComponent, ProductSelectionModalComponent, AlertPopupComponent],
   imports: [
+      DropdownModule,
+      FormsModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,

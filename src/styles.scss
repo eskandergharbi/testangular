@@ -1,3 +1,44 @@
 @import '@core/scss/core.scss';
 @import './assets/scss/styles';
 @import 'animate.css/animate.min.css';
+/* Make the dialog appear on the right */
+.right-side-modal .modal-dialog {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 0;
+  height: 100%;
+  width: 40%;
+  max-width: 500px;
+  transform: none !important;
+}
+
+/* Make the modal content fill the right-side dialog */
+.right-side-modal .modal-content {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional animation */
+.right-side-modal .modal-dialog {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Responsive for mobile */
+@media (max-width: 768px) {
+  .right-side-modal .modal-dialog {
+    width: 90% !important;
+    max-width: 90% !important;
+  }
+}

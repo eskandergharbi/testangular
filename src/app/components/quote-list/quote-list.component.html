@@ -1,0 +1,95 @@
+<div class="container mt-4">
+  <h1>Tableau des devis classés par client</h1>
+
+  <!-- Zone de recherche + bouton Ajouter -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+    <div class="input-group me-2" style="max-width: 400px;">
+      <input type="text" class="form-control" placeholder="Recherche par mot clé" 
+             [(ngModel)]="searchTerm" (keyup.enter)="searchQuotes()">
+      <button class="btn btn-outline-secondary" type="button" (click)="searchQuotes()">
+        Rechercher
+      </button>
+    </div>
+    <div>
+      <button class="btn btn-primary" (click)="openQuoteDetails()">
+        <i class="bi bi-plus"></i> Ajouter
+      </button>
+    </div>
+  </div>
+
+  <!-- Tableau des devis -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>RÉFÉRENCE</th>
+              <th>DATE</th>
+              <th>CLIENT</th>
+              <th>TOTAL</th>
+              <th>STATUT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let quote of quotes">
+              <td>
+                <span class="reference-color">
+                  {{ quote.reference || 'DEV-' + quote.id?.toString().padStart(4, '0') }}
+                </span>
+              </td>
+              <td>{{ quote.created_at | date:'dd/MM/yyyy' }}</td>
+              <td>{{ quote.client?.nom }} {{ quote.client?.prenom }}</td>
+              <td>{{ quote.total }} TND</td>
+              <td>
+                <span class="badge bg-success" *ngIf="quote.status === 'Accepté'">Accepté</span>
+                <span class="badge bg-warning" *ngIf="!quote.status">En attente</span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-eye-fill icon-button" (click)="openQuoteDetails(quote)" title="Voir détails"></i>
+                  <i class="bi bi-files icon-button" (click)="duplicateQuote(quote)" title="Dupliquer"></i>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="isLoading">
+              <td colspan="6" class="text-center">
+                <div class="spinner-border" role="status">
+                  <span class="visually-hidden">Chargement...</span>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="!isLoading && quotes.length === 0">
+              <td colspan="6" class="text-center">Aucun devis trouvé</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center" *ngIf="totalPages > 1">
+        <ngb-pagination 
+          [(page)]="currentPage" 
+          [pageSize]="10" 
+          [collectionSize]="totalPages * 10"
+          (pageChange)="onPageChange($event)">
+        </ngb-pagination>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone d'information -->
+  <div class="mt-4">
+    <div class="alert alert-info">
+      <strong>Nota</strong>
+      <ul class="mb-0">
+        <li>Davis</li>
+        <li>Mois : Mars 2025</li>
+        <li>01/04 - 30/04</li>
+      </ul>
+    </div>
+  </div>
+</div>

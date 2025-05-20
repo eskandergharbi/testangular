@@ -1,0 +1,41 @@
+.card-header {
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+}
+.reference-color {
+  color: #6f42c1; /* mauve/bleu */
+  font-weight: bold;
+}
+.table {
+  th {
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+}
+
+.badge {
+  font-size: 0.85em;
+  padding: 0.35em 0.65em;
+}
+
+.alert-info {
+  background-color: #f8f9fa;
+  border-color: #e9ecef;
+  color: #495057;
+  
+  strong {
+    color: #212529;
+  }
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}

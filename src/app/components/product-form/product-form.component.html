@@ -1,0 +1,43 @@
+<div class="modal-header">
+  <h4 class="modal-title">Nettadvisor - Devis</h4>
+  <button type="button" class="btn p-1" aria-label="Close" (click)="activeModal.dismiss()">
+    <i class="bi bi-x-lg fs-5"></i>
+  </button>
+</div>
+
+<div class="modal-body">
+  <div class="alert alert-danger" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Libellé*</label>
+    <input type="text" class="form-control" [(ngModel)]="product.libelle" placeholder="Entrez le libellé de votre produit">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Description*</label>
+    <textarea class="form-control" [(ngModel)]="product.description" 
+              placeholder="Entrez la description de votre produit"></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Prix*</label>
+    <input type="number" class="form-control" [(ngModel)]="product.prix" 
+           placeholder="Entrez le prix de votre produit" min="0" step="0.01">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Quantité*</label>
+    <input type="number" class="form-control" [(ngModel)]="product.quantite" 
+           placeholder="Entrez la quantité de votre produit" min="0">
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Annuler</button>
+  <button type="button" class="btn btn-primary" (click)="saveProduct()" [disabled]="isLoading">
+    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Ajouter produit
+  </button>
+</div>
