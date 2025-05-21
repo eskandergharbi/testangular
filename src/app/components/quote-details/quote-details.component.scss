@@ -189,4 +189,40 @@ select option span[style*="color: red"] {
   font-style: italic;
 }
 
-/* ... (keep other styles same) */
+.table-designation {
+  td {
+    vertical-align: middle;
+    
+    .d-flex {
+      gap: 10px;
+    }
+    
+    .form-control-sm {
+      width: 80px;
+      text-align: center;
+    }
+  }
+}
+
+.view-mode-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  span {
+    font-size: 0.8rem;
+  }
+}
+.table-designation td {
+  vertical-align: middle;
+}
+
+.table-designation input.form-control-sm {
+  width: 80px; /* Fixed width for quantity inputs */
+  display: inline-block;
+}
+
+.view-mode-product {
+  padding: 0.375rem;
+  display: inline-block;
+}

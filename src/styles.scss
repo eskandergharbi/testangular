@@ -42,3 +42,6 @@
     max-width: 90% !important;
   }
 }
+.p-dropdown-panel {
+  z-index: 1100 !important; /* plus grand que la modale Bootstrap */
+}

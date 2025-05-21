@@ -81,7 +81,6 @@ duplicateQuote(originalQuote: Quote): Observable<Quote> {
 
 generatePdf(quote: Quote, client: any, products: any[]): void {
   try {
-    console.log('Starting PDF generation...', {quote, client, products});
     
     if (!quote || !client || !products) {
       console.error('Missing required data for PDF generation');
@@ -145,7 +144,6 @@ generatePdf(quote: Quote, client: any, products: any[]): void {
     
     // Output
     const fileName = `Devis-NETTADVISOR-${quote.id || 'new'}.pdf`;
-    console.log('PDF generated successfully, saving as:', fileName);
     doc.save(fileName);
     
   } catch (error) {

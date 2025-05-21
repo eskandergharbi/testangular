@@ -68,7 +68,6 @@
               <input type="text" 
                      class="form-control flex-grow-1" 
                      [(ngModel)]="searchProductTerm"
-                     (input)="searchProducts()"
                      placeholder="Saisir le nom ou la description du produit">
               
               <button class="btn btn-primary" 
@@ -104,52 +103,83 @@
         </thead>
         <tbody>
           <tr *ngFor="let item of selectedProducts; let i = index; trackBy: trackByProductId">
-          <!-- In the product dropdown cell, update to this: -->
-<td>
-  <p-dropdown 
-    [options]="filteredProducts"
-    [(ngModel)]="item.product"
-    optionLabel="libelle"
-    [style]="{'width':'100%'}"
-    [panelStyle]="{'min-width':'300px'}"
-    [disabled]="isViewMode"
-    *ngIf="!isViewMode">
-    
-    <ng-template let-product pTemplate="selectedItem">
-      {{ product?.libelle }} 
-      <span [ngStyle]="getProductStatusColor(product)">
-        ({{ getProductStatusText(product) }})
-      </span>
-    </ng-template>
-  </p-dropdown>
-  
-  <!-- Add this for view mode -->
-  <div *ngIf="isViewMode" class="view-mode-product">
-    {{ item.product?.libelle || 'N/A' }}
-    <span [ngStyle]="getProductStatusColor(item.product)">
-      ({{ getProductStatusText(item.product) }})
-    </span>
-  </div>
-</td>
-         <td>
-  <input type="number" 
-         class="form-control form-control-sm" 
-         min="1" 
-         [(ngModel)]="item.quantity" 
-         [disabled]="isViewMode"
-         *ngIf="!isViewMode">
-  <span *ngIf="isViewMode">{{ item.quantity }}</span>
-</td>
-            <td>{{ item.prix | number:'1.3-3' }} TND</td>
+            <!-- Product Dropdown Column -->
+            <td>
+              <p-dropdown 
+                appendTo="body"
+                [autoDisplayFirst]="false"
+                [autoZIndex]="true"
+                [options]="products"
+                [(ngModel)]="item.product"
+                (onChange)="onProductSelect($event, i)"
+                optionLabel="libelle"
+                [style]="{'width':'100%'}"
+                [panelStyle]="{'min-width':'300px'}"
+                [disabled]="isViewMode"
+                [filter]="true"
+                filterBy="libelle,description">
+                
+                <ng-template let-product pTemplate="selectedItem">
+                  <div *ngIf="product">
+                    {{ product.libelle }} 
+                    <span [ngStyle]="getProductStatusColor(product)">
+                      ({{ getProductStatusText(product) }})
+                    </span>
+                  </div>
+                  <div *ngIf="!product">Sélectionner un produit</div>
+                </ng-template>
+                
+                <ng-template let-product pTemplate="item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{{ product.libelle }}</strong>
+                      <div class="small text-muted">{{ product.description }}</div>
+                    </div>
+                    <span [ngStyle]="getProductStatusColor(product)">
+                      {{ getProductStatusText(product) }}
+                    </span>
+                  </div>
+                </ng-template>
+              </p-dropdown>
+              
+              <div *ngIf="isViewMode" class="view-mode-product">
+                {{ item.product?.libelle || 'N/A' }}
+                <span [ngStyle]="getProductStatusColor(item.product)">
+                  ({{ getProductStatusText(item.product) }})
+                </span>
+              </div>
+            </td>
+            
+            <!-- Quantity Column -->
+            <td>
+              <input type="number" 
+                     class="form-control form-control-sm" 
+                     min="1" 
+                     [(ngModel)]="item.quantity" 
+                     (ngModelChange)="updateQuantity(i, $event)"
+                     [disabled]="isViewMode"
+                     *ngIf="!isViewMode">
+              <span *ngIf="isViewMode">{{ item.quantity}}</span>
+            </td>
+            
+            <!-- Unit Price Column -->
+            <td>
+              <span *ngIf="isViewMode">{{ item.prix | number:'1.3-3' }} TND</span>
+              <input *ngIf="!isViewMode" type="number" class="form-control form-control-sm" 
+                     [(ngModel)]="item.prix" 
+                     (ngModelChange)="calculateTotals()"
+                     step="0.001">
+            </td>    
+            
+            <!-- Total Column -->
             <td>{{ (item.prix * item.quantity) | number:'1.3-3' }} TND</td>
+            
+            <!-- Remove Button Column -->
             <td class="text-center" *ngIf="!isViewMode">
               <button class="btn btn-sm btn-outline-danger" (click)="removeProduct(i)">
                 <i class="bi bi-trash"></i>
               </button>
             </td>
-          </tr>
-          <tr *ngIf="selectedProducts.length === 0">
-            <td colspan="5" class="text-center text-muted py-3">Aucun produit ajouté</td>
           </tr>
         </tbody>
       </table>
@@ -204,7 +234,7 @@
     {{ isViewMode ? 'Fermer' : 'Annuler' }}
   </button>
   
- <button type="button" 
+  <button type="button" 
           class="btn btn-primary" 
           (click)="saveQuote()" 
           [disabled]="isLoading || isViewMode"

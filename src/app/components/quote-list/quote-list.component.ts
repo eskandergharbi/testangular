@@ -69,41 +69,54 @@ export class QuoteListComponent implements OnInit {
       }
     }).catch(() => { });
   }
-
-  duplicateQuote(quote: Quote): void {
-    if (!quote) return;
-    
-    this.isLoading = true;
-    
-    const modalRef = this.modalService.open(QuoteDetailsComponent, { size: 'lg' });
-    
-    modalRef.componentInstance.quote = {
-      ...quote,
-      created_at: new Date().toISOString().split('T')[0],
-      id: undefined,
-      reference: undefined
-    };
-    
-    modalRef.componentInstance.isEditMode = false;
-    modalRef.componentInstance.isDuplicatedQuote = true;
-    
-    if (quote.produitsdocuments) {
-      modalRef.componentInstance.selectedProducts = quote.produitsdocuments.map(item => ({
+duplicateQuote(quote: Quote): void {
+  if (!quote) return;
+  
+  this.isLoading = true;
+  
+  const modalRef = this.modalService.open(QuoteDetailsComponent, { 
+    size: 'lg',
+    backdrop: 'static'
+  });
+  
+  // Create a deep copy of the quote
+  const duplicatedQuote = {
+    ...quote,
+    id: undefined,
+    reference: undefined,
+    created_at: new Date().toISOString().split('T')[0],
+    produitsdocuments: []
+  };
+  
+  // Prepare selected products with proper quantities
+  if (quote.produitsdocuments) {
+    const selectedProducts = quote.produitsdocuments.map(item => {
+      // Use the quantity from the original quote item or the product's quantity
+      const quantity = item.quantity || (item.product?.quantite || 1);
+      
+      return {
         products: item.product?.id || item.products,
         document: 0,
         product: item.product ? { ...item.product } : null,
-        quantity: item.quantity,
-        prix: item.prix
-      }));
-    }
-    
-    modalRef.result.then((result) => {
-      if (result === 'saved') {
-        this.loadQuotes();
-      }
-    }).catch(() => {})
-    .finally(() => {
-      this.isLoading = false;
+        quantity: quantity,
+        prix: item.prix || (item.product?.prix || 0)
+      };
     });
+    
+    modalRef.componentInstance.selectedProducts = selectedProducts;
   }
+  
+  modalRef.componentInstance.quote = duplicatedQuote;
+  modalRef.componentInstance.isEditMode = false;
+  modalRef.componentInstance.isDuplicatedQuote = true;
+  
+  modalRef.result.then((result) => {
+    if (result === 'saved') {
+      this.loadQuotes();
+    }
+  }).catch(() => {})
+  .finally(() => {
+    this.isLoading = false;
+  });
+}
 }

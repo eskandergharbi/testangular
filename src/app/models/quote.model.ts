@@ -1,15 +1,14 @@
 import { Client } from './client.model';
 import { Product } from './product.model';
 
+// In your quote.model.ts
 export interface QuoteProduct {
-  prix: number;
-  quantity: number;
   id?: number;
   products: number;
-  document: number;
-  product: Product;
-  created_at?: string;
-  updated_at?: string;
+  document?: number;
+  product?: Product;
+  quantity: number;  // Make quantity required
+  prix: number;
 }
 
 export interface Quote {
@@ -20,10 +19,8 @@ export interface Quote {
   total: number;
   created_at?: string;
   updated_at?: string;
-  client?: Client;
-  produitsdocuments?: QuoteProduct[];
   reference?: string;
-  status?: string;
+  produitsdocuments?: QuoteProduct[];  // Ensure this matches the API response
 }
 
 export interface QuoteResponse {
