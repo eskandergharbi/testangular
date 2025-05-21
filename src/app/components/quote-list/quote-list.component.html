@@ -4,8 +4,8 @@
   <!-- Zone de recherche + bouton Ajouter -->
   <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
     <div class="input-group me-2" style="max-width: 400px;">
-      <input type="text" class="form-control" placeholder="Recherche par mot clé" 
-             [(ngModel)]="searchTerm" (keyup.enter)="searchQuotes()">
+      <input type="text" class="form-control" placeholder="Recherche par mot clé" [(ngModel)]="searchTerm"
+        (keyup.enter)="searchQuotes()">
       <button class="btn btn-outline-secondary" type="button" (click)="searchQuotes()">
         Rechercher
       </button>
@@ -48,7 +48,8 @@
               </td>
               <td>
                 <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-eye-fill icon-button" (click)="openQuoteDetails(quote)" title="Voir détails"></i>
+                  <i class="bi bi-eye-fill icon-button" (click)="openQuoteDetails(quote, true)"
+                    title="Voir détails"></i>
                   <i class="bi bi-files icon-button" (click)="duplicateQuote(quote)" title="Dupliquer"></i>
                 </div>
               </td>
@@ -71,10 +72,7 @@
 
       <!-- Pagination -->
       <div class="d-flex justify-content-center" *ngIf="totalPages > 1">
-        <ngb-pagination 
-          [(page)]="currentPage" 
-          [pageSize]="10" 
-          [collectionSize]="totalPages * 10"
+        <ngb-pagination [(page)]="currentPage" [pageSize]="10" [collectionSize]="totalPages * 10"
           (pageChange)="onPageChange($event)">
         </ngb-pagination>
       </div>

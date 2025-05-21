@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnChanges, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ClientService } from '../../services/client.service';
 import { ProductService } from '../../services/product.service';
@@ -10,13 +10,18 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ClientFormComponent } from '../client-form/client-form.component';
 import { ProductFormComponent } from '../product-form/product-form.component';
 import { AlertService } from 'app/services/alert.service';
+import { Dropdown } from 'primeng/dropdown';
 
 @Component({
   selector: 'app-quote-details',
   templateUrl: './quote-details.component.html',
   styleUrls: ['./quote-details.component.scss']
 })
-export class QuoteDetailsComponent implements OnInit {
+export class QuoteDetailsComponent implements OnInit ,OnChanges,AfterViewChecked {
+  @ViewChildren(Dropdown) dropdowns!: QueryList<Dropdown>;
+@Input() isViewMode = false; // New input to distinguish view mode
+
+  @Input() isDuplicatedQuote = false;
   today: Date = new Date();
 
   @Input() quote: Quote = {
@@ -28,7 +33,8 @@ export class QuoteDetailsComponent implements OnInit {
   };
   @Input() isEditMode = false;
   @Input() selectedProducts: QuoteProduct[] = [];
-  
+    private shouldOpenDropdown = false;
+
   successMessage = '';
   clients: Client[] = [];
   products: Product[] = [];
@@ -39,6 +45,7 @@ export class QuoteDetailsComponent implements OnInit {
   errorMessage = '';
 
   constructor(
+    private cd: ChangeDetectorRef,
     public activeModal: NgbActiveModal,
     private clientService: ClientService,
     private productService: ProductService,
@@ -46,49 +53,97 @@ export class QuoteDetailsComponent implements OnInit {
     private modalService: NgbModal,
     private alertService: AlertService
   ) { }
-
-  ngOnInit(): void {
-    this.loadClients();
-    this.loadProducts();
-    
-    // Initialize with empty selectedProducts (no initial row)
-    if (this.quote.produitsdocuments && this.quote.produitsdocuments.length > 0) {
-      this.selectedProducts = this.quote.produitsdocuments.map(item => ({
-        products: item.products,
-        document: 0,
-        product: { ...item.product },
-        quantity: item.quantity,
-        prix: item.prix
-      }));
+  ngAfterViewChecked(): void {
+    if (this.shouldOpenDropdown && this.dropdowns.length > 0) {
+      const lastDropdown = this.dropdowns.last;
+      if (lastDropdown) {
+        lastDropdown.show();
+        this.shouldOpenDropdown = false;
+      }
     }
   }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.selectedProducts) {
+      // Handle selectedProducts changes
+      console.log('selectedProducts changed:', this.selectedProducts);
+      }  }
 
+ // In the ngOnInit method, update the initialization:
+ngOnInit(): void {
+  this.loadClients();
+  
+  if (this.isViewMode && this.quote.produitsdocuments && this.quote.produitsdocuments.length > 0) {
+    this.selectedProducts = this.quote.produitsdocuments.map(item => ({
+      products: item.product?.id || item.products,
+      document: item.document,
+      product: item.product ? { ...item.product } : null,
+      quantity: item.quantity,
+      prix: item.prix
+    }));
+    
+    // Load products for view mode
+    this.loadProductsForViewMode();
+  } else if (!this.isViewMode) {
+    this.loadProducts();
+  }
+}
+
+loadProductsForViewMode(): void {
+  this.productService.getProducts().subscribe(products => {
+    this.products = products;
+    this.filteredProducts = products;
+    
+    // Map products to selectedProducts
+    this.selectedProducts = this.selectedProducts.map(item => {
+      if (item.products) {
+        const product = this.products.find(p => p.id === item.products);
+        if (product) {
+          return {
+            ...item,
+            product: { ...product }
+          };
+        }
+      }
+      return item;
+    });
+  });
+}
   loadClients(): void {
     this.clientService.getClients().subscribe(clients => {
       this.clients = clients;
     });
   }
 
-  loadProducts(): void {
-    this.productService.getProducts().subscribe(products => {
-      this.products = products;
+loadProducts(): void {
+  this.isLoading = true;
+  this.productService.getProducts().subscribe({
+    next: (products) => {
+      this.products = [...products];
       this.filteredProducts = [...products];
       
-      if (this.selectedProducts) {
-        this.selectedProducts.forEach(item => {
-          if (item.products) {
-            const product = this.products.find(p => p.id === item.products);
-            if (product) {
-              item.product = product;
-              if (!item.prix || item.prix === 0) {
-                item.prix = product.prix;
-              }
-            }
+      // Update selected products with fresh references
+      this.selectedProducts = this.selectedProducts.map(item => {
+        if (item.products) {
+          const product = this.products.find(p => p.id === item.products);
+          if (product) {
+            return {
+              ...item,
+              product: { ...product }, // New reference
+              prix: item.prix || product.prix
+            };
           }
-        });
-      }
-    });
-  }
+        }
+        return item;
+      });
+      
+      this.isLoading = false;
+    },
+    error: (err) => {
+      this.isLoading = false;
+      console.error('Error loading products', err);
+    }
+  });
+}
 formatDateForInput(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -96,30 +151,52 @@ formatDateForInput(dateString: string): string {
 }
 
 handleDateInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.quote.created_at = input.value ? new Date(input.value).toISOString() : '';
-    this.calculateTotals();
+  const input = event.target as HTMLInputElement;
+  this.quote.created_at = input.value;
+  console.log(this.quote.created_at);
+  console.log(input.value);
+  
+  this.calculateTotals();
 }
-  addNewProductRow(): void {
-    this.selectedProducts.push({
+
+// Modify your addNewProductRow method
+addNewProductRow(): void {
+  this.selectedProducts = [
+    ...this.selectedProducts,
+    {
       products: 0,
       document: this.quote.id || 0,
-      product: {} as Product,
+      product: null,
       quantity: 1,
       prix: 0
-    });
-  }
-
-  onProductSelect(item: QuoteProduct, index: number): void {
-    if (item.products && this.selectedProducts[index]) {
-      const product = this.products.find(p => p.id === item.products);
-      if (product) {
-        this.selectedProducts[index].product = product;
-        this.selectedProducts[index].prix = product.prix;
-        this.calculateTotals();
-      }
     }
+  ];
+
+  setTimeout(() => {
+    const dropdowns = document.querySelectorAll('p-dropdown');
+    const lastDropdown = dropdowns[dropdowns.length - 1];
+    if (lastDropdown) {
+      lastDropdown.dispatchEvent(new Event('click'));
+    }
+  }, 100);
+}
+onProductSelect(event: any, index: number): void {
+  const selectedProduct = event.value;
+  if (selectedProduct) {
+    // Create a new array to trigger change detection
+    this.selectedProducts = [...this.selectedProducts];
+    
+    this.selectedProducts[index] = {
+      ...this.selectedProducts[index],
+      products: selectedProduct.id,
+      product: { ...selectedProduct }, // Create a new object reference
+      prix: selectedProduct.prix
+    };
+
+    this.calculateTotals();
+    // No need for manual change detection with the array spread above
   }
+}
 
   removeProduct(index: number): void {
     this.selectedProducts.splice(index, 1);
@@ -144,6 +221,8 @@ handleDateInput(event: Event): void {
       product.libelle.toLowerCase().includes(this.searchProductTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(this.searchProductTerm.toLowerCase())
     );
+    console.log(this.filteredProducts);
+    
   }
 
   searchAndAddProduct(): void {
@@ -259,6 +338,10 @@ onDateChange(newDate: string): void {
     this.quote.created_at = new Date(newDate).toISOString();
     this.calculateTotals();
 }
+trackByProductId(index: number, item: QuoteProduct): number {
+  return item.products || index;
+}
+
 saveQuote(): void {
      if (!this.quote.created_at) {
         this.quote.created_at = new Date().toISOString();
@@ -267,6 +350,7 @@ saveQuote(): void {
         this.alertService.showAlert('Veuillez sélectionner un client avant de soumettre le devis!');
         return;
     }
+  console.log('Before save:', this.quote.created_at); // Should show correct date
 
     // Format the date properly before saving
     const payload = {
@@ -340,36 +424,64 @@ saveQuote(): void {
     });
   }
 
-  previewPDF(): void {
-    try {
-      if (!this.quote) {
-        this.errorMessage = 'Devis non disponible';
-        return;
-      }
-
-      const client = this.clients.find(c => c.id === this.quote.client_id);
-      if (!client) {
-        this.errorMessage = 'Information client manquante';
-        return;
-      }
-
-      const validProducts = this.selectedProducts.filter(p => p.product && p.product.id);
-      if (validProducts.length === 0) {
-        this.errorMessage = 'Aucun produit valide';
-        return;
-      }
-
-      this.quoteService.generatePdf(
-        this.quote,
-        client,
-        validProducts
-      );
-
-    } catch (error) {
-      console.error('Error in previewPDF:', error);
-      this.errorMessage = 'Erreur lors de la génération du PDF';
+previewPDF(): void {
+  try {
+    if (!this.quote) {
+      this.errorMessage = 'Devis non disponible';
+      return;
     }
+
+    // Find client or use the selected one
+    let client: Client;
+    if (this.quote.client_id) {
+      client = this.clients.find(c => c.id == this.quote.client_id);
+      console.log(client);
+      console.log(this.clients);
+      
+      
+    } else if (this.clients.length > 0) {
+      // Fallback to first client if none selected (for demo purposes)
+      client = this.clients[0];
+      this.quote.client_id = client.id;
+    }
+
+    if (!client) {
+      this.errorMessage = 'Information client manquante';
+      return;
+    }
+
+    // Filter valid products and ensure they have quantities
+    const validProducts = this.selectedProducts
+      .filter(p => p.product && p.product.id && p.quantity > 0)
+      .map(p => ({
+        ...p,
+        quantity: p.quantity || 1, // Default to 1 if quantity is 0
+        prix: p.prix || (p.product?.prix || 0)
+      }));
+
+    if (validProducts.length === 0) {
+      this.errorMessage = 'Aucun produit valide';
+      return;
+    }
+
+    // Calculate totals if not already done
+    this.calculateTotals();
+
+    this.quoteService.generatePdf(
+      {
+        ...this.quote,
+        total: this.quote.total || 0,
+        tva: this.quote.tva || 20
+      },
+      client,
+      validProducts
+    );
+
+  } catch (error) {
+    console.error('Error in previewPDF:', error);
+    this.errorMessage = 'Erreur lors de la génération du PDF';
   }
+}
 
   getProductStatusColor(product: Product): any {
   return product.quantite > 0 ? {'color': 'green'} : {'color': 'red', 'font-style': 'italic'};

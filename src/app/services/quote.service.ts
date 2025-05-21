@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { Quote, QuoteResponse } from '../models/quote.model';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -30,6 +30,7 @@ createQuote(quoteData: {
   products: number[]; // Array of product IDs
 }): Observable<Quote> {
   return this.http.post<Quote>(this.apiUrl, quoteData).pipe(
+        tap(response => console.log('API response date:', response.created_at)),
     catchError(this.handleError)
   );
 }
@@ -77,10 +78,6 @@ duplicateQuote(originalQuote: Quote): Observable<Quote> {
         catchError(this.handleError)
       );
   }
-
-
-
-
 
 generatePdf(quote: Quote, client: any, products: any[]): void {
   try {
